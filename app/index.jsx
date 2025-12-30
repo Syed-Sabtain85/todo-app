@@ -13,18 +13,21 @@ export default function Index() {
   const [placeHolder, setPlaceHolder] = useState("Enter the todo");
   const [editingTodoId, setEditingTodoId] = useState(null);
 
-  const changebuttonText = (id) => {
-    setButtonText("Update Todo");
-    setPlaceHolder("Update the todo");
-  }
   const startEditTodo = (todo) => {
     setText(todo.title);
     setEditingTodoId(todo.id);
     setButtonText("Update Todo");
     setPlaceHolder("Update the todo");
   };
+
   const editTodo = () => {
-    if (text.trim() === "") return;
+    if (text.trim() === "") {
+      setText("");
+      setEditingTodoId(null);
+      setButtonText("Add Todo");
+      setPlaceHolder("Enter the todo");
+      return;
+    }
 
     setTodoList(
       todoList.map((todo) =>
