@@ -1,9 +1,10 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from "react";
+import { use, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { todos } from "../data/todo";
+import { Outfit_400Regular, useFonts } from '@expo-google-fonts/outfit';
 
 export default function Index() {
   const [todoList, setTodoList] = useState(todos);
@@ -12,6 +13,13 @@ export default function Index() {
   const [placeHolder, setPlaceHolder] = useState("Enter the todo");
   const [editingTodoId, setEditingTodoId] = useState(null);
   const isEditing = editingTodoId !== null;
+  const [loaded, error] = useFonts({
+    Outfit_400Regular,
+  });
+
+  if (!loaded) {
+    return null;
+  }
 
   const startEditTodo = (todo) => {
     setText(todo.title);
@@ -22,10 +30,7 @@ export default function Index() {
 
   const editTodo = () => {
     if (text.trim() === "") {
-      setText("");
-      setEditingTodoId(null);
-      setButtonText("Add Todo");
-      setPlaceHolder("Enter the todo");
+      resetUi();
       return;
     }
 
@@ -36,13 +41,17 @@ export default function Index() {
           : todo
       )
     );
+    resetUi();
 
     // Reset UI
+
+  };
+  const resetUi = () => {
     setText("");
     setEditingTodoId(null);
     setButtonText("Add Todo");
     setPlaceHolder("Enter the todo");
-  };
+  }
 
   const addTodo = () => {
     if (text.trim() === "") return;
@@ -145,6 +154,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   input: {
+    alignItems: 'center',
+    fontFamily: 'Outfit_400Regular',
     flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,
@@ -164,6 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   addButtonText: {
+    fontFamily: 'Outfit_400Regular',
     color: '#ffffff',
     fontSize: 13,
     fontWeight: 'bold',
@@ -204,6 +216,7 @@ const styles = StyleSheet.create({
   },
 
   todoText: {
+    fontFamily: 'Outfit_400Regular',
     fontSize: 18,
     color: 'black',
     flexShrink: 1,

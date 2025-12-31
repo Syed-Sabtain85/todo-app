@@ -1,7 +1,15 @@
+import { Outfit_700Bold, useFonts } from '@expo-google-fonts/outfit';
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Outfit_700Bold,
+  });
+
+  if (!loaded) {
+    return null;
+  }
   return (
     <SafeAreaProvider>
       <Stack>
@@ -12,7 +20,7 @@ export default function RootLayout() {
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#6200ee" },
             headerTintColor: "#ffffff",
-            headerTitleStyle: { fontSize: 30,fontWeight: "bold" },
+            headerTitleStyle: { fontFamily: 'Outfit_700Bold', fontSize: 30 },
           }}
         />
       </Stack>
