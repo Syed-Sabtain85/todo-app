@@ -6,12 +6,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { todos } from "../data/todo";
 
 export default function Index() {
-
   const [todoList, setTodoList] = useState(todos);
   const [text, setText] = useState("");
   const [buttonText, setButtonText] = useState("Add Todo");
   const [placeHolder, setPlaceHolder] = useState("Enter the todo");
   const [editingTodoId, setEditingTodoId] = useState(null);
+  const isEditing = editingTodoId !== null;
 
   const startEditTodo = (todo) => {
     setText(todo.title);
@@ -56,13 +56,6 @@ export default function Index() {
     ]);
     setText("");
   }
-  const title = (id) => {
-    const todo = todoList.find((todo) => todo.id === id);
-    if (todo.completed) {
-      return
-    }
-    return <Text style={styles.todoText}>{todo.title}</Text>
-  };
 
   const toggleTodo = (id) => {
     setTodoList(
@@ -93,7 +86,9 @@ export default function Index() {
         </Pressable>
 
       </View>
+
       <FlatList
+        scrollEnabled={!isEditing}
         data={todoList}
         keyExtractor={todoList => todoList.id}
         showsVerticalScrollIndicator={false}
@@ -101,28 +96,38 @@ export default function Index() {
         renderItem={({ item }) => (
 
           <View style={styles.todoItem}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-
+            <View style={styles.leftContainer}>
               <Pressable
-                onPress={() => toggleTodo(item.id)}
-                style={{ marginRight: 10 }}>
-                <FontAwesome6 name="circle-check" size={24} style={item.completed ? styles.checkIcon : styles.checkIconUncompleted} />
+                style={{ marginRight: 10, opacity: isEditing ? 0.5 : 1 }}
+                disabled={isEditing}
+                onPress={() => toggleTodo(item.id)}>
+                <FontAwesome6
+                  name="circle-check"
+                  size={24}
+                  style={item.completed ? styles.checkIcon : styles.checkIconUncompleted}
+                />
               </Pressable>
-              <Text style={[styles.todoText, item.completed && styles.todoTextCompleted]}>{item.title}</Text>
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-              <Pressable style={{ marginLeft: 10 }}
-                onPress={() => startEditTodo(item)}>
 
+              <Text
+                style={[styles.todoText, item.completed && styles.todoTextCompleted]}
+                numberOfLines={1}
+                ellipsizeMode="middle">
+                {item.title}
+              </Text>
+            </View>
+            <View style={styles.iconContainer}>
+              <Pressable style={{ opacity: isEditing || item.completed ? 0.5 : 1 }} disabled={isEditing || item.completed} onPress={() => startEditTodo(item)}>
                 <MaterialIcons name="mode-edit" size={24} color="black" />
               </Pressable>
+
               <Pressable
-                onPress={() => deleteTodo(item.id)}>
+                style={{ opacity: isEditing ? 0.5 : 1 }}
+                disabled={isEditing} onPress={() => deleteTodo(item.id)}>
                 <MaterialIcons name="delete-forever" size={24} color="red" />
               </Pressable>
             </View>
-
           </View>
+
         )}
       />
     </SafeAreaProvider>
@@ -132,8 +137,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-
+    padding: 10,
     backgroundColor: '#f5f5f5',
   },
   inputContainer: {
@@ -177,11 +181,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     height: 60,
   },
-  todoText: {
-    fontSize: 18,
-    textDecorationLine: 'none',
-    color: 'black',
-  },
   todoTextCompleted: {
     textDecorationLine: 'line-through',
     color: '#999999',
@@ -191,5 +190,22 @@ const styles = StyleSheet.create({
   },
   checkIconUncompleted: {
     color: 'gray',
-  }
+  },
+  leftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
+  },
+
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  todoText: {
+    fontSize: 18,
+    color: 'black',
+    flexShrink: 1,
+  },
 });      
