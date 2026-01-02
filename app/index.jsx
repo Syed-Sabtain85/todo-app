@@ -1,14 +1,17 @@
+import { ThemeContext } from '@/context/ThemeContext';
+import { Outfit_400Regular, useFonts } from '@expo-google-fonts/outfit';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { use, useState } from "react";
+import Octicons from "@expo/vector-icons/Octicons";
+import { useContext, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { todos } from "../data/todo";
-import { Outfit_400Regular, useFonts } from '@expo-google-fonts/outfit';
 
 export default function Index() {
   const [todoList, setTodoList] = useState(todos);
   const [text, setText] = useState("");
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext)
   const [buttonText, setButtonText] = useState("Add Todo");
   const [placeHolder, setPlaceHolder] = useState("Enter the todo");
   const [editingTodoId, setEditingTodoId] = useState(null);
@@ -20,7 +23,7 @@ export default function Index() {
   if (!loaded) {
     return null;
   }
-
+  const styles = createStyleSheet(theme, colorScheme)
   const startEditTodo = (todo) => {
     setText(todo.title);
     setEditingTodoId(todo.id);
@@ -82,16 +85,27 @@ export default function Index() {
     <SafeAreaProvider style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
           placeholder={placeHolder}
-          placeholderTextColor='#6200ee'
+          placeholderTextColor={theme.placeHolderText}
           value={text}
           onChangeText={setText}
+          style={styles.input}
         />
         <Pressable
           onPress={editingTodoId ? editTodo : addTodo}
           style={styles.addButton}>
           <Text style={styles.addButtonText}>{buttonText}</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            setColorScheme(colorScheme === 'light' ? 'dark' : 'light')
+          }}
+          style={{ marginLeft: 10 }}>
+          {
+            colorScheme === 'dark'
+              ? <Octicons name='moon' size={36} color={theme.text} style={{ width: 36 }} />
+              : <Octicons name='sun' size={36} color={theme.text} style={{ width: 36 }} />
+          }
         </Pressable>
 
       </View>
@@ -126,7 +140,7 @@ export default function Index() {
             </View>
             <View style={styles.iconContainer}>
               <Pressable style={{ opacity: isEditing || item.completed ? 0.5 : 1 }} disabled={isEditing || item.completed} onPress={() => startEditTodo(item)}>
-                <MaterialIcons name="mode-edit" size={24} color="black" />
+                <MaterialIcons name="mode-edit" size={24} color={colorScheme === 'dark'? 'white' : 'black'}/>
               </Pressable>
 
               <Pressable
@@ -143,82 +157,87 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  input: {
-    alignItems: 'center',
-    fontFamily: 'Outfit_400Regular',
-    flex: 1,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    height: 40,
-    fontSize: 16,
-    minWidth: 0,
-    color: 'black',
-  },
-  addButton: {
-    backgroundColor: '#6200ee',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    marginLeft: 10,
-    borderRadius: 5,
-  },
-  addButtonText: {
-    fontFamily: 'Outfit_400Regular',
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: 'bold',
-  },
-  todoItem: {
-    backgroundColor: '#ffffff',
-    padding: 15,
-    borderRadius: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 16,
-    height: 60,
-  },
-  todoTextCompleted: {
-    textDecorationLine: 'line-through',
-    color: '#999999',
-  },
-  checkIcon: {
-    color: 'green',
-  },
-  checkIconUncompleted: {
-    color: 'gray',
-  },
-  leftContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    minWidth: 0,
-  },
+function createStyleSheet(theme, colorScheme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 10,
+      backgroundColor: theme.background,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      marginBottom: 10,
+    },
+    input: {
+      alignItems: 'center',
+      fontFamily: 'Outfit_400Regular',
+      flex: 1,
+      borderColor: theme.borderColor,
+      borderWidth: 1,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      height: 45,
+      fontSize: 16,
+      minWidth: 0,
+      color: theme.text,
+    },
+    addButton: {
+      backgroundColor: theme.button,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 15,
+      marginLeft: 10,
+      borderRadius: 5,
+    },
+    addButtonText: {
+      fontFamily: 'Outfit_400Regular',
+      color: theme.buttonText,
+      fontSize: 13,
+      fontWeight: 'bold',
+    },
+    todoItem: {
+      backgroundColor: theme.background,
+      padding: 15,
+      borderRadius: 5,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 10,
+      borderColor: theme.borderColor,
+      borderWidth: 1,
+      borderRadius: 16,
+      height: 60,
+    },
+    todoTextCompleted: {
+      textDecorationLine: 'line-through',
+      color: '#999999',
+    },
+    checkIcon: {
+      color: 'green',
+    },
+    checkIconUncompleted: {
+      color: 'gray',
+    },
+    leftContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      minWidth: 0,
+    },
 
-  iconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+    iconContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  todoText: {
-    fontFamily: 'Outfit_400Regular',
-    fontSize: 18,
-    color: 'black',
-    flexShrink: 1,
-  },
-});      
+    todoText: {
+      fontFamily: 'Outfit_400Regular',
+      fontSize: 18,
+      color: theme.text,
+      flexShrink: 1,
+    },
+    editIcon:{
+
+    }
+  })
+}  
