@@ -3,8 +3,10 @@ import { Outfit_400Regular, useFonts } from '@expo-google-fonts/outfit';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Octicons from "@expo/vector-icons/Octicons";
-import { useContext, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useContext, useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import Animated, { LinearTransition } from 'react-native-reanimated';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { todos } from "../data/todo";
 
@@ -19,6 +21,40 @@ export default function Index() {
   const [loaded, error] = useFonts({
     Outfit_400Regular,
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const todoJson = await AsyncStorage.getItem("list");
+
+        if (todoJson !== null) {
+          const todo = JSON.parse(todoJson);
+          setTodoList(todo.sort((a, b) => b.id - a.id));
+        } else {
+          setTodoList(todos.sort((a, b) => b.id - a.id));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+  useEffect(() => {
+    const storeTodo = async () => {
+      try {
+        const todo_json = JSON.stringify(todoList);
+        await AsyncStorage.setItem("list", todo_json);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    storeTodo();
+  }, [todoList]);
+
 
   if (!loaded) {
     return null;
@@ -45,8 +81,6 @@ export default function Index() {
       )
     );
     resetUi();
-
-    // Reset UI
 
   };
   const resetUi = () => {
@@ -85,11 +119,11 @@ export default function Index() {
     <SafeAreaProvider style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput
+          style={styles.input}
           placeholder={placeHolder}
           placeholderTextColor={theme.placeHolderText}
           value={text}
           onChangeText={setText}
-          style={styles.input}
         />
         <Pressable
           onPress={editingTodoId ? editTodo : addTodo}
@@ -110,11 +144,15 @@ export default function Index() {
 
       </View>
 
-      <FlatList
+      <Animated.FlatList
         scrollEnabled={!isEditing}
         data={todoList}
-        keyExtractor={todoList => todoList.id}
+        keyExtractor={todoList => todoList.id.toString()}
         showsVerticalScrollIndicator={false}
+        itemLayoutAnimation={LinearTransition}
+        ListEmptyComponent={
+          <Text style={styles.emptyList}>No todo is stored</Text>
+        }
         contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
         renderItem={({ item }) => (
 
@@ -124,11 +162,7 @@ export default function Index() {
                 style={{ marginRight: 10, opacity: isEditing ? 0.5 : 1 }}
                 disabled={isEditing}
                 onPress={() => toggleTodo(item.id)}>
-                <FontAwesome6
-                  name="circle-check"
-                  size={24}
-                  style={item.completed ? styles.checkIcon : styles.checkIconUncompleted}
-                />
+                <FontAwesome6 name="circle-check" size={24} style={item.completed ? styles.checkIcon : styles.checkIconUncompleted} />
               </Pressable>
 
               <Text
@@ -140,7 +174,7 @@ export default function Index() {
             </View>
             <View style={styles.iconContainer}>
               <Pressable style={{ opacity: isEditing || item.completed ? 0.5 : 1 }} disabled={isEditing || item.completed} onPress={() => startEditTodo(item)}>
-                <MaterialIcons name="mode-edit" size={24} color={colorScheme === 'dark'? 'white' : 'black'}/>
+                <MaterialIcons name="mode-edit" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
               </Pressable>
 
               <Pressable
@@ -229,14 +263,21 @@ function createStyleSheet(theme, colorScheme) {
       flexDirection: 'row',
       alignItems: 'center',
     },
-
+    emptyList: {
+      alignContent: 'center',
+      marginHorizontal: 'auto',
+      fontFamily: 'Outfit_400Regular',
+      fontSize: 18,
+      color: theme.text,
+      flexShrink: 1,
+    },
     todoText: {
       fontFamily: 'Outfit_400Regular',
       fontSize: 18,
       color: theme.text,
       flexShrink: 1,
     },
-    editIcon:{
+    editIcon: {
 
     }
   })

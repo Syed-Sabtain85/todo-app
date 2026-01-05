@@ -5,7 +5,6 @@ import { Colors } from '../constants/Colors'
 
 export const ThemeContext = createContext()
 
-// export const ThemeProvider = ({childern}) =>{
     export const ThemeProvider = ({ children }) => {
 
 
