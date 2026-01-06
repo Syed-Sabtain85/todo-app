@@ -35,128 +35,124 @@ export default function Index() {
     }; fetchData();
   }, []);
 
-  
-
-
-
-useEffect(() => {
-  const storeTodo = async () => {
-    try {
-      const todo_json = JSON.stringify(todoList);
-      await AsyncStorage.setItem("list", todo_json);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  storeTodo();
-}, [todoList]);
-
-
-if (!loaded) {
-  return null;
-}
-const styles = createStyleSheet(theme, colorScheme)
-
-const addTodo = () => {
-  if (text.trim() === "") return;
-  setTodoList([
-    ...todoList,
-    {
-      id: todoList.length + 1,
-      title: text,
-      completed: false,
-    }
-  ]);
-  setText("");
-}
-
-const toggleTodo = (id) => {
-  setTodoList(
-    todoList.map((todo) => (
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ))
-  )
-}
-
-const deleteTodo = (id) => {
-  setTodoList(todoList.filter((todo) => todo.id !== id));
-}
-const handlePress = (id) => {
-  router.push(`/todos/${id}`)
-}
-return (
-  <SafeAreaView style={styles.container}>
-
-    <View style={styles.inputContainer}>
-      <TextInput
-        style={styles.input}
-        placeholder='Enter the todo'
-        placeholderTextColor={theme.placeHolderText}
-        value={text}
-        onChangeText={setText}
-      />
-      <Pressable
-        onPress={addTodo}
-        style={styles.addButton}>
-        <Text style={styles.addButtonText}>Add Todo</Text>
-      </Pressable>
-      <Pressable
-        onPress={() => {
-          setColorScheme(colorScheme === 'light' ? 'dark' : 'light')
-        }}
-        style={{ marginLeft: 10 }}>
-        {
-          colorScheme === 'dark'
-            ? <Octicons name='moon' size={36} color={theme.text} style={{ width: 36 }} />
-            : <Octicons name='sun' size={36} color={theme.text} style={{ width: 36 }} />
-        }
-      </Pressable>
-
-    </View>
-
-    <Animated.FlatList
-      data={todoList}
-      keyExtractor={todoList => todoList.id.toString()}
-      showsVerticalScrollIndicator={false}
-      itemLayoutAnimation={LinearTransition}
-      ListEmptyComponent={
-        <Text style={styles.emptyList}>No todo, enjoy your day!</Text>
+  useEffect(() => {
+    const storeTodo = async () => {
+      try {
+        const todo_json = JSON.stringify(todoList);
+        await AsyncStorage.setItem("list", todo_json);
+      } catch (e) {
+        console.log(e);
       }
-      contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
-      renderItem={({ item }) => (
+    };
 
-        <View style={styles.todoItem}>
-          <View style={styles.leftContainer}>
-            <Pressable
-              style={{ marginRight: 10 }}
-              onPress={() => toggleTodo(item.id)}>
-              <FontAwesome6 name="circle-check" size={24} style={item.completed ? styles.checkIcon : styles.checkIconUncompleted} />
-            </Pressable>
+    storeTodo();
+  }, [todoList]);
 
-            <Text
-              style={[styles.todoText, item.completed && styles.todoTextCompleted]}
-              numberOfLines={1}
-              ellipsizeMode="middle"
-              onPress={() => { handlePress(item.id) }}>
-              {item.title}
-            </Text>
+
+  if (!loaded) {
+    return null;
+  }
+  const styles = createStyleSheet(theme, colorScheme)
+
+  const addTodo = () => {
+    if (text.trim() === "") return;
+    setTodoList([
+      ...todoList,
+      {
+        id: todoList.length + 1,
+        title: text,
+        completed: false,
+      }
+    ]);
+    setText("");
+  }
+
+  const toggleTodo = (id) => {
+    setTodoList(
+      todoList.map((todo) => (
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      ))
+    )
+  }
+
+  const deleteTodo = (id) => {
+    setTodoList(todoList.filter((todo) => todo.id !== id));
+  }
+  const handlePress = (id) => {
+    router.push(`/todos/${id}`)
+  }
+  return (
+    <SafeAreaView style={styles.container}>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder='Enter the todo'
+          placeholderTextColor={theme.placeHolderText}
+          value={text}
+          onChangeText={setText}
+        />
+        <Pressable
+          onPress={addTodo}
+          style={styles.addButton}>
+          <Text style={styles.addButtonText}>Add Todo</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            setColorScheme(colorScheme === 'light' ? 'dark' : 'light')
+          }}
+          style={{ marginLeft: 10 }}>
+          {
+            colorScheme === 'dark'
+              ? <Octicons name='moon' size={36} color={theme.text} style={{ width: 36 }} />
+              : <Octicons name='sun' size={36} color={theme.text} style={{ width: 36 }} />
+          }
+        </Pressable>
+
+      </View>
+
+      <Animated.FlatList
+        data={todoList}
+        keyExtractor={todoList => todoList.id.toString()}
+        showsVerticalScrollIndicator={false}
+        itemLayoutAnimation={LinearTransition}
+        ListEmptyComponent={
+          <Text style={styles.emptyList}>No todo, enjoy your day!</Text>
+        }
+        contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
+        renderItem={({ item }) => (
+
+          <View style={styles.todoItem}>
+            <View style={styles.leftContainer}>
+              <Pressable
+                style={{ marginRight: 10 }}
+                onPress={() => toggleTodo(item.id)}>
+                <FontAwesome6 name="circle-check" size={24} style={item.completed ? styles.checkIcon : styles.checkIconUncompleted} />
+              </Pressable>
+
+              <Text
+                style={[styles.todoText, item.completed && styles.todoTextCompleted]}
+                numberOfLines={1}
+                ellipsizeMode="middle"
+                onPress={() => { handlePress(item.id) }}>
+                {item.title}
+              </Text>
+            </View>
+            <View style={styles.iconContainer}>
+
+              <Pressable
+                onPress={() => deleteTodo(item.id)}>
+                <MaterialIcons name="delete-forever" size={24} color="red" />
+              </Pressable>
+            </View>
           </View>
-          <View style={styles.iconContainer}>
 
-            <Pressable
-              onPress={() => deleteTodo(item.id)}>
-              <MaterialIcons name="delete-forever" size={24} color="red" />
-            </Pressable>
-          </View>
-        </View>
+        )}
+      />
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
-      )}
-    />
-    <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-
-  </SafeAreaView>
-);
+    </SafeAreaView>
+  );
 }
 
 function createStyleSheet(theme, colorScheme) {
